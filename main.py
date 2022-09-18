@@ -1,7 +1,10 @@
+from ast import Await
 import logging
+from typing import Type
 from admin import is_admin
 
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 API_TOKEN = '5683599741:AAEAaqWehHZX9zzDyEvH9q3g0D3tHDaVR-I'
 
@@ -22,7 +25,7 @@ async def send_welcome(message: types.Message):
 
     global auto_status
 
-    await message.reply("Enter login and password:\nFormat like 'admin 1234' in one msg")
+    await message.answer("Введите данные для входа\nПример сообщения для авторизации: 'admin 1234'\nПишите логин и пароль СТРОГО в одном сообщении")
     auto_status = True
 
 
@@ -42,12 +45,24 @@ async def echo(message: types.Message):
     if auto_status:
         auto_status = False
         login_data = message.text.split(" ")
-        print(login_data)
+        # print(login_data)
         admin = is_admin(login_data[0],login_data[1])
         if admin:
-            await message.reply("Success")
+            await message.answer("Успешно")
+        else:
+            await message.answer("Вход не выполнен. Проверьте корректность введённых данных")
 
-    await message.answer(message.text)
+    INKB = InlineKeyboardMarkup(row_width=3).add(InlineKeyboardButton(text="++", callback_data="++"))\
+        .add(InlineKeyboardButton(text="+-", callback_data="+"))\
+        .add(InlineKeyboardButton(text="--", callback_data="--"))   # Эту инлайн-клаву нужно вкарячить в Send_audio
 
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    await message.answer("вот", reply_markup=INKB)  # сюда
+    # await message.answer(message.text)
+
+@dp.callback_query_handler(text="++")
+async def new_answer(callback: types.CallbackQuery):
+    await callback.message.answer("Выбрано ++")
+
+
+# if __name__ == '__main__':
+executor.start_polling(dp, skip_updates=True)
