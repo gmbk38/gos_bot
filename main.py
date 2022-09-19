@@ -1,5 +1,5 @@
 import logging
-from admin import is_admin
+from admin import is_admin, main_keyboard, admin_skills
 from logs import User_log as ul
 
 from aiogram import Bot, Dispatcher, executor, types
@@ -14,21 +14,21 @@ dp = Dispatcher(bot)
 
 admin = False
 auto_status = False
+login_edit_status = False
 user = ul() #объявляем пользователя
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
-    await message.reply("Hi!\nI'm EchoBot!\nPowered by aiogram.")
+    await message.answer(f"Здравствуйте, {message.from_user.first_name}\nЧем я могу помочь?")
 
     user.id = message.chat.id
     user.fname = message.from_user.first_name
     user.lname = message.from_user.last_name
     user.nickname = message.from_user.username
     user.user_record()
-    user.new_record()
 
 @dp.message_handler(commands=['access'])
-async def send_welcome(message: types.Message):
+async def access(message: types.Message):
 
     global auto_status
 
@@ -37,14 +37,15 @@ async def send_welcome(message: types.Message):
 
 
 @dp.message_handler(commands=['whoami'])
-async def send_welcome(message: types.Message):
+async def whoami(message: types.Message):
     if admin:
         await message.reply("Admin")
     else:
         await message.reply("User")
 
+
 @dp.message_handler()
-async def echo(message: types.Message):
+async def common_answer(message: types.Message):
 
     global auto_status
     global admin
@@ -55,24 +56,23 @@ async def echo(message: types.Message):
         # print(login_data)
         admin = is_admin(login_data[0],login_data[1])
         if admin:
-            await message.answer("Успешно")
+            await message.answer("Панель администратораЖ:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=main_keyboard())
         else:
             await message.answer("Вход не выполнен. Проверьте корректность введённых данных")
 
-    INKB = InlineKeyboardMarkup(row_width=3).add(InlineKeyboardButton(text="++", callback_data="++"))\
-        .add(InlineKeyboardButton(text="+-", callback_data="+"))\
-        .add(InlineKeyboardButton(text="--", callback_data="--"))   # Эту инлайн-клаву нужно вкарячить в Send_audio
 
-    await message.answer("вот", reply_markup=INKB)  # сюда
-    # await message.answer(message.text)
-
-@dp.callback_query_handler(text="++")
+@dp.callback_query_handler(text="login_edit")
 async def new_answer(callback: types.CallbackQuery):
-    await callback.message.answer("Выбрано ++")
-    INKB2 = InlineKeyboardMarkup(row_width=3).add(InlineKeyboardButton(text="++---", callback_data="++"))\
-        .add(InlineKeyboardButton(text="+----", callback_data="+"))\
-        .add(InlineKeyboardButton(text="-----", callback_data="--")) 
-    await callback.message.edit_text("a ntgth", reply_markup=INKB2)
+    if admin:
+        await callback.message.edit_text("Редактирование данных:\nПожалуйста, отправьте новый логин и пароль ОДНИМ сообщением", reply_markup=None)
+
+# @dp.callback_query_handler(text="++")
+# async def new_answer(callback: types.CallbackQuery):
+#     await callback.message.answer("Выбрано ++")
+#     INKB2 = InlineKeyboardMarkup(row_width=3).add(InlineKeyboardButton(text="++---", callback_data="++"))\
+#         .add(InlineKeyboardButton(text="+----", callback_data="+"))\
+#         .add(InlineKeyboardButton(text="-----", callback_data="--")) 
+#     await callback.message.edit_text("a ntgth", reply_markup=INKB2)
 
 
 # if __name__ == '__main__':

@@ -9,36 +9,25 @@ class User_log():
         self.nickname = None
 
 
-    def new_record(self):
-        file_check = open("users/users.csv","a+",encoding='utf-8')
-        file_check.write(str(self.id) + "," + str(self.fname) + "," + str(self.lname) + "," + str(self.nickname) + "\n")
-        file_check.write(str(self.id) + "," + str(self.fname) + "," + str(self.lname) + "," + str(self.nickname) + "\n")
-        file_check.close()
+    def user_record(self):
 
         file_check = open("users/users.csv","r",encoding='utf-8')
         lines = file_check.readlines()
-        mark = 0
+        new_client = True
+
         for line in lines:
             line = line.replace("\n","")
-            print(line)
-        # df = pd.DataFrame(df)
-        # df.to_csv('users/users.csv', sep=',', encoding='utf-8', header=False, index=False)
+            line = line.split(",")
+            if line[0] == str(self.id) and line[1] == str(self.fname) and line[2] == str(self.lname) and line[3] == str(self.nickname):
+                new_client = False
+                print("old")
 
+        file_check.close()
 
-    def user_record(self):
-        #добавляем лог пользователя
-        file_check = open("users/users.txt","r",encoding='utf-8')
-        lines = file_check.readlines()
-        mark = 0
-        for line in lines:
-            #проверяем, пользовался ли человек ботом
-            line = line.replace("\n","")
-            if line == str(self.id) + " | " + str(self.fname) + " | " + str(self.lname) + " | " + str(self.nickname):
-                mark = 1
-                break
-        if mark == 0:
-            file_upd = open("users/users.txt","a+",encoding='utf-8')
-            file_upd.write(str(self.id) + " | " + str(self.fname) + " | " + str(self.lname) + " | " + str(self.nickname) + "\n")
+        if new_client:
+            print("new")
+            file_upd = open("users/users.csv","a+",encoding='utf-8')
+            file_upd.write(str(self.id) + "," + str(self.fname) + "," + str(self.lname) + "," + str(self.nickname) + "\n")
             file_upd.close()
 
 
