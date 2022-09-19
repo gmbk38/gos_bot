@@ -25,6 +25,7 @@ async def send_welcome(message: types.Message):
     user.lname = message.from_user.last_name
     user.nickname = message.from_user.username
     user.user_record()
+    user.new_record()
 
 @dp.message_handler(commands=['access'])
 async def send_welcome(message: types.Message):

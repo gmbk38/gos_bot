@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import pandas as pd
 
 class User_log():
     def __init__(self):
@@ -7,6 +7,22 @@ class User_log():
         self.fname = None
         self.lname = None
         self.nickname = None
+
+
+    def new_record(self):
+        file_check = open("users/users.csv","a+",encoding='utf-8')
+        file_check.write(str(self.id) + "," + str(self.fname) + "," + str(self.lname) + "," + str(self.nickname) + "\n")
+        file_check.write(str(self.id) + "," + str(self.fname) + "," + str(self.lname) + "," + str(self.nickname) + "\n")
+        file_check.close()
+
+        file_check = open("users/users.csv","r",encoding='utf-8')
+        lines = file_check.readlines()
+        mark = 0
+        for line in lines:
+            line = line.replace("\n","")
+            print(line)
+        # df = pd.DataFrame(df)
+        # df.to_csv('users/users.csv', sep=',', encoding='utf-8', header=False, index=False)
 
 
     def user_record(self):
