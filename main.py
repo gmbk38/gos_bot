@@ -1,7 +1,6 @@
-from ast import Await
 import logging
-from typing import Type
 from admin import is_admin
+from logs import User_log as ul
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -15,10 +14,17 @@ dp = Dispatcher(bot)
 
 admin = False
 auto_status = False
+user = ul() #объявляем пользователя
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
     await message.reply("Hi!\nI'm EchoBot!\nPowered by aiogram.")
+
+    user.id = message.chat.id
+    user.fname = message.from_user.first_name
+    user.lname = message.from_user.last_name
+    user.nickname = message.from_user.username
+    user.user_record()
 
 @dp.message_handler(commands=['access'])
 async def send_welcome(message: types.Message):
@@ -62,6 +68,10 @@ async def echo(message: types.Message):
 @dp.callback_query_handler(text="++")
 async def new_answer(callback: types.CallbackQuery):
     await callback.message.answer("Выбрано ++")
+    INKB2 = InlineKeyboardMarkup(row_width=3).add(InlineKeyboardButton(text="++---", callback_data="++"))\
+        .add(InlineKeyboardButton(text="+----", callback_data="+"))\
+        .add(InlineKeyboardButton(text="-----", callback_data="--")) 
+    await callback.message.edit_text("a ntgth", reply_markup=INKB2)
 
 
 # if __name__ == '__main__':
