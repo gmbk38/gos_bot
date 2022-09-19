@@ -20,12 +20,12 @@ class User_log():
             line = line.split(",")
             if line[0] == str(self.id) and line[1] == str(self.fname) and line[2] == str(self.lname) and line[3] == str(self.nickname):
                 new_client = False
-                print("old")
+                # print("old")
 
         file_check.close()
 
         if new_client:
-            print("new")
+            # print("new")
             file_upd = open("users/users.csv","a+",encoding='utf-8')
             file_upd.write(str(self.id) + "," + str(self.fname) + "," + str(self.lname) + "," + str(self.nickname) + "\n")
             file_upd.close()

@@ -6,8 +6,9 @@ def is_admin(login, pwd):
     df = pd.read_csv('admin/login.csv', sep=',', header=None)
     # print(df.values)
 
-    true_login = str(df[0].values[0])
-    true_pwd = str(df[1].values[0])
+    true_login = str(df[0].values[len(df) - 1])
+    true_pwd = str(df[1].values[len(df) - 1])
+    # Логин и пароль не могут отсутствовать!!!
 
     if (login == true_login and pwd == true_pwd):
         return True
@@ -26,5 +27,9 @@ def main_keyboard():
     keyboard.add(admin_exit)
     return keyboard
 
-def admin_skills(command):
-    pass
+def admin_skills(command, data):
+    if command == "login_edit":
+        data = data.replace(" ",",")
+        file_upd = open("admin/login.csv","a+",encoding='utf-8')
+        file_upd.write(data + "\n")
+        file_upd.close()

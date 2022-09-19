@@ -19,7 +19,7 @@ user = ul() #объявляем пользователя
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
-    await message.answer(f"Здравствуйте, {message.from_user.first_name}\nЧем я могу помочь?")
+    await message.answer(f"Здравствуйте, {message.from_user.first_name}\nЧем я могу помочь?\n\nКоманды:\n\nПроверить статус - /whoami\nПанель администратора - /access")
 
     user.id = message.chat.id
     user.fname = message.from_user.first_name
@@ -31,6 +31,10 @@ async def send_welcome(message: types.Message):
 async def access(message: types.Message):
 
     global auto_status
+
+    if admin:
+        await message.answer("Вы уже администратор", reply_markup=main_keyboard())
+        return False
 
     await message.answer("Введите данные для входа\nПример сообщения для авторизации: 'admin 1234'\nПишите логин и пароль СТРОГО в одном сообщении")
     auto_status = True
@@ -48,6 +52,7 @@ async def whoami(message: types.Message):
 async def common_answer(message: types.Message):
 
     global auto_status
+    global login_edit_status
     global admin
 
     if auto_status:
@@ -56,15 +61,40 @@ async def common_answer(message: types.Message):
         # print(login_data)
         admin = is_admin(login_data[0],login_data[1])
         if admin:
-            await message.answer("Панель администратораЖ:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=main_keyboard())
+            await message.answer("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=main_keyboard())
         else:
             await message.answer("Вход не выполнен. Проверьте корректность введённых данных")
 
 
+    if login_edit_status:
+        login_edit_status = False
+        new_login_and_pwd = message.text.split(" ")
+        if len(new_login_and_pwd) == 2:
+            admin_skills("login_edit", message.text)
+            await message.answer("Логин и пароль успешно изменён!", reply_markup=main_keyboard())
+        else:
+            await message.answer("Некорректные данные!", reply_markup=main_keyboard())
+
+
+# Изменение логина и пароля
+
+
 @dp.callback_query_handler(text="login_edit")
 async def new_answer(callback: types.CallbackQuery):
+
+    global login_edit_status
+
     if admin:
+        login_edit_status = True
         await callback.message.edit_text("Редактирование данных:\nПожалуйста, отправьте новый логин и пароль ОДНИМ сообщением", reply_markup=None)
+
+@dp.callback_query_handler(text="admin_exit")
+async def new_answer(callback: types.CallbackQuery):
+
+    global admin
+    admin = False
+
+    await callback.message.answer("Вы вышли из панели администратора")
 
 # @dp.callback_query_handler(text="++")
 # async def new_answer(callback: types.CallbackQuery):
