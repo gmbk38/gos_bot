@@ -27,7 +27,36 @@ def main_keyboard():
     keyboard.add(admin_exit)
     return keyboard
 
-def admin_skills(command, data):
+
+def faq_keyboard():
+    keyboard = InlineKeyboardMarkup()
+    faq_edit = InlineKeyboardButton(text="Изменить", callback_data="faq_1")
+    faq_add = InlineKeyboardButton(text="Добавить", callback_data="faq_2")
+    keyboard.row(faq_edit, faq_add)
+    faq_exit = InlineKeyboardButton(text="Назад", callback_data="faq_exit")
+    keyboard.add(faq_exit)
+    return keyboard
+
+
+def stats_keyboard():
+    keyboard = InlineKeyboardMarkup()
+    faq_exit = InlineKeyboardButton(text="Назад", callback_data="stats_exit")
+    keyboard.add(faq_exit)
+    return keyboard
+    
+
+def current_keyboard(name):
+    if name == "main":
+        return main_keyboard()
+    if name == "faq":
+        return faq_keyboard()
+    if name == "stats":
+        return stats_keyboard()
+    if name == "msg":
+        return faq_keyboard()
+
+
+def admin_skills(command, data = None):
     if command == "login_edit":
         data = data.replace(" ",",")
         file_upd = open("admin/login.csv","a+",encoding='utf-8')

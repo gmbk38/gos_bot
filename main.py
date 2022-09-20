@@ -1,5 +1,5 @@
 import logging
-from admin import is_admin, main_keyboard, admin_skills
+from admin import is_admin, current_keyboard, admin_skills
 from logs import User_log as ul
 
 from aiogram import Bot, Dispatcher, executor, types
@@ -16,6 +16,13 @@ admin = False
 auto_status = False
 login_edit_status = False
 user = ul() #объявляем пользователя
+keyboards = {
+    0: "main",
+    1: "faq",
+    2: "stats",
+    3: "msg"
+}
+selected_keyboard = None
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
@@ -33,7 +40,7 @@ async def access(message: types.Message):
     global auto_status
 
     if admin:
-        await message.answer("Вы уже администратор", reply_markup=main_keyboard())
+        await message.answer("Вы уже администратор", reply_markup=current_keyboard(keyboards[0]))
         return False
 
     await message.answer("Введите данные для входа\nПример сообщения для авторизации: 'admin 1234'\nПишите логин и пароль СТРОГО в одном сообщении")
@@ -53,6 +60,7 @@ async def common_answer(message: types.Message):
 
     global auto_status
     global login_edit_status
+    global selected_keyboard
     global admin
 
     if auto_status:
@@ -61,7 +69,8 @@ async def common_answer(message: types.Message):
         # print(login_data)
         admin = is_admin(login_data[0],login_data[1])
         if admin:
-            await message.answer("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=main_keyboard())
+            selected_keyboard = keyboards[0]
+            await message.answer("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=current_keyboard(keyboards[0]))
         else:
             await message.answer("Вход не выполнен. Проверьте корректность введённых данных")
 
@@ -71,22 +80,25 @@ async def common_answer(message: types.Message):
         new_login_and_pwd = message.text.split(" ")
         if len(new_login_and_pwd) == 2:
             admin_skills("login_edit", message.text)
-            await message.answer("Логин и пароль успешно изменён!", reply_markup=main_keyboard())
+            selected_keyboard = keyboards[0]
+            await message.answer("Логин и пароль успешно изменён!", reply_markup=current_keyboard(keyboards[0]))
         else:
-            await message.answer("Некорректные данные!", reply_markup=main_keyboard())
+            selected_keyboard = keyboards[0]
+            await message.answer("Некорректные данные!", reply_markup=current_keyboard(keyboards[0]))
 
 
 # Изменение логина и пароля
-
-
 @dp.callback_query_handler(text="login_edit")
 async def new_answer(callback: types.CallbackQuery):
 
     global login_edit_status
+    global selected_keyboard
 
     if admin:
         login_edit_status = True
+        selected_keyboard = None
         await callback.message.edit_text("Редактирование данных:\nПожалуйста, отправьте новый логин и пароль ОДНИМ сообщением", reply_markup=None)
+
 
 @dp.callback_query_handler(text="admin_exit")
 async def new_answer(callback: types.CallbackQuery):
@@ -95,6 +107,46 @@ async def new_answer(callback: types.CallbackQuery):
     admin = False
 
     await callback.message.answer("Вы вышли из панели администратора")
+
+
+@dp.callback_query_handler(text="faq_edit")
+async def new_answer(callback: types.CallbackQuery):
+
+    global selected_keyboard
+    
+    if admin:
+        selected_keyboard = keyboards[1]
+        await callback.message.edit_text("Выберите опцию:", reply_markup=current_keyboard(keyboards[1]))
+
+
+@dp.callback_query_handler(text="faq_exit")
+async def new_answer(callback: types.CallbackQuery):
+
+    global selected_keyboard
+    
+    if admin:
+        selected_keyboard = keyboards[0]
+        await callback.message.edit_text("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=current_keyboard(keyboards[0]))
+
+
+@dp.callback_query_handler(text="stats")
+async def new_answer(callback: types.CallbackQuery):
+
+    global selected_keyboard
+    
+    if admin:
+        selected_keyboard = keyboards[2]
+        await callback.message.edit_text("Статистика:\n\n✅Услуга 1: 224 \n✅Услуга 2: 24 \n✅Услуга 3: 1320 \n✅Услуга 4: 2422", reply_markup=current_keyboard(keyboards[2]))
+
+
+@dp.callback_query_handler(text="stats_exit")
+async def new_answer(callback: types.CallbackQuery):
+
+    global selected_keyboard
+    
+    if admin:
+        selected_keyboard = keyboards[0]
+        await callback.message.edit_text("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=current_keyboard(keyboards[0]))
 
 # @dp.callback_query_handler(text="++")
 # async def new_answer(callback: types.CallbackQuery):
