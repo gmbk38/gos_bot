@@ -1,3 +1,4 @@
+import keyword
 import pandas as pd
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -43,7 +44,35 @@ def stats_keyboard():
     faq_exit = InlineKeyboardButton(text="Назад", callback_data="stats_exit")
     keyboard.add(faq_exit)
     return keyboard
+
+def msg_keyboard():
+    keyboard = InlineKeyboardMarkup()
+    msg_exit = InlineKeyboardButton(text="Назад", callback_data="stats_exit")
+    keyboard.add(msg_exit)
+    return keyboard
+
+def faq_show():
+    df = pd.read_csv('faq/faq.csv', sep=',', header=None)
+    # print(df.values)
+    faq_dict = {}
+
+    for row in range(0, len(df)):
+        faq_dict[df[0].values[row]] = df[1].values[row]
+
+    return faq_dict
     
+def faq_data_kb():
+    data = faq_show()
+    keyboard = InlineKeyboardMarkup()
+    for element in data:
+        keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element)))
+    return keyboard
+
+def choice():
+    keyboard = InlineKeyboardMarkup()
+    keyboard.row(InlineKeyboardButton(text="Вопрос", callback_data="Вопрос__"), InlineKeyboardButton(text="Ответ", callback_data="Ответ__"))
+    keyboard.add(InlineKeyboardButton(text="Назад", callback_data="stats_exit"))
+    return keyboard
 
 def current_keyboard(name):
     if name == "main":
@@ -53,7 +82,11 @@ def current_keyboard(name):
     if name == "stats":
         return stats_keyboard()
     if name == "msg":
-        return faq_keyboard()
+        return msg_keyboard()
+    if name == "faq_data":
+        return faq_data_kb()
+    if name == "faq_e":
+        return choice()
 
 
 def admin_skills(command, data = None):
@@ -62,3 +95,30 @@ def admin_skills(command, data = None):
         file_upd = open("admin/login.csv","a+",encoding='utf-8')
         file_upd.write(data + "\n")
         file_upd.close()
+
+
+def read_all_id():
+    pass
+
+def faq_add(q,a):
+        file_upd = open("faq/faq.csv","a+",encoding='utf-8')
+        file_upd.write(str(q) + "," + str(a) + "\n")
+        file_upd.close()
+
+def file_rewrite(data):
+        file_upd = open("faq/faq.csv","w",encoding='utf-8')
+        for element in data:
+            file_upd.write(str(element) + "," + str(data[element]) + "\n")
+        file_upd.close()
+
+def upd_q(text, current_data):
+    data = faq_show()
+    data = {v:k for k, v in data.items()}
+    data[current_data[1]] = text
+    data = {v:k for k, v in data.items()}
+    file_rewrite(data)
+
+def upd_a(text, current_data):
+    data = faq_show()
+    data[current_data[0]] = text
+    file_rewrite(data)
