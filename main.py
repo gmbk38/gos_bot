@@ -44,10 +44,11 @@ selected_keyboard = None
 
 @dp.message_handler(commands=['start', 'help'])
 async def start_ans(message: types.Message):
-    await message.answer(f"Здравствуйте, {message.from_user.first_name}\nЧем я могу помочь?\n\nКоманды:\n\nПроверить статус - /whoami\nПанель администратора - /access", reply_markup=u_start_keyboard())
 
     if not ct(message):
         return False
+        
+    await message.answer(f"Здравствуйте, {message.from_user.first_name}\nЧем я могу помочь?\n\nКоманды:\n\nПроверить статус - /whoami\nПанель администратора - /access", reply_markup=u_start_keyboard())
 
     global user_category
     user_category = False
