@@ -32,6 +32,7 @@ def u_start_keyboard():
     keyboard = InlineKeyboardMarkup()
     for element in headers:
         keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element[:20])))
+    keyboard.add(InlineKeyboardButton(text='FAQ', callback_data='show_faq'))
     return keyboard
 
 def u_q_keyboard(header):
@@ -70,6 +71,7 @@ def mark_btns():
 def stats_record(category, mark):
 
     main_stats = False
+    mark = encoding_mark(mark)
 
     try:
         file_check = open("stats/stats.csv","r",encoding='utf-8')
@@ -80,7 +82,7 @@ def stats_record(category, mark):
         for line in lines:
             arr = []
             line = line.replace("\n","")
-            line = line.split(";")
+            line = line.split(",")
             arr = [line[0], line[1], line[2]]
             main_stats.append(arr)
 
@@ -96,14 +98,27 @@ def stats_record(category, mark):
             file_upd.write(category + "," + str(0) + "," + str(1) + "\n")
         file_upd.close()
     else:
+        exists = False
         for element in main_stats:
             if element[0] == category:
+                exists = True
                 if mark:
                     element[1] = int(element[1]) + 1
                 else:
                     element[2] = int(element[2]) + 1
+        
+        if not exists:
+            arr = []
+            arr.append(category)
+            if mark:
+                arr.append(1)
+                arr.append(0)
+            else:
+                arr.append(0)
+                arr.append(1)
+            main_stats.append(arr)
 
         file_upd = open("stats/stats.csv","w+",encoding='utf-8')
         for element in main_stats:
-            file_upd.write(element[0] + "," + element[1] + "," + element[2] + "\n")
+            file_upd.write(element[0] + "," + str(element[1]) + "," + str(element[2]) + "\n")
         file_upd.close()

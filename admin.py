@@ -1,6 +1,7 @@
 import pandas as pd
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from user_conf import encoding
 
 def is_admin(login, pwd):
     df = pd.read_csv('admin/login.csv', sep=',', header=None)
@@ -122,3 +123,52 @@ def upd_a(text, current_data):
     data = faq_show()
     data[current_data[0]] = text
     file_rewrite(data)
+
+def get_users():
+    users = []
+    try:
+        file_check = open("users/users.csv","r",encoding='utf-8')
+        lines = file_check.readlines()
+
+        for line in lines:
+            line = line.replace("\n","")
+            line = line.split(",")
+            users.append(int(line[0]))
+    except Exception as ex:
+        pass
+
+    return users
+
+def get_stats():
+    try:
+        file_check = open("stats/stats.csv","r",encoding='utf-8')
+        lines = file_check.readlines()
+
+        main_stats = []
+
+        for line in lines:
+            arr = []
+            line = line.replace("\n","")
+            line = line.split(",")
+            arr = [line[0], line[1], line[2]]
+            main_stats.append(arr)
+
+        file_check.close()
+    except Exception as ex:
+        pass
+
+    all_users = get_users()
+    u = 0
+    g = 0
+    for i in all_users:
+        if i < 0:
+            g += 1
+        else:
+            u += 1
+
+    ans = f'Актуальная статистика:\n\nКоличество пользователей: {u} 👤\n\nКоличество групп: {g} 👥\n\n'
+
+    for element in main_stats:
+        ans += f'{str(encoding(element[0]))}:\n✅ {element[1]} ❌ {element[2]}\n\n'
+    
+    return ans
