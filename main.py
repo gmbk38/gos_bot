@@ -1,5 +1,8 @@
+from email import message
 import logging
+from unicodedata import category
 from admin import faq_keyboard, is_admin, current_keyboard, admin_skills, faq_add, faq_show, upd_q, upd_a
+from user_conf import mark_btns, u_start_keyboard, u_q_keyboard, u_a_keyboard, encoding, encoding_mark, stats_record
 from extra_func import chat_type as ct
 from logs import User_log as ul
 
@@ -22,6 +25,9 @@ faq_edit_status = False
 q_add = False
 q_edit = False
 a_edit = False
+
+user_category = False
+
 current_data = []
 user = ul() #объявляем пользователя
 keyboards = {
@@ -37,7 +43,10 @@ selected_keyboard = None
 
 @dp.message_handler(commands=['start', 'help'])
 async def start_ans(message: types.Message):
-    await message.answer(f"Здравствуйте, {message.from_user.first_name}\nЧем я могу помочь?\n\nКоманды:\n\nПроверить статус - /whoami\nПанель администратора - /access")
+    await message.answer(f"Здравствуйте, {message.from_user.first_name}\nЧем я могу помочь?\n\nКоманды:\n\nПроверить статус - /whoami\nПанель администратора - /access", reply_markup=u_start_keyboard())
+
+    global user_category
+    user_category = False
 
     user.id = message.chat.id
     user.fname = message.from_user.first_name
@@ -120,6 +129,7 @@ async def common_answer(message: types.Message):
         if admin:
             selected_keyboard = keyboards[0]
             await message.answer("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=current_keyboard(keyboards[0]))
+            # await message.delete()
         else:
             await message.answer("Вход не выполнен. Проверьте корректность введённых данных")
 
@@ -259,7 +269,9 @@ async def stats_exit_ans(callback: types.CallbackQuery):
     global faq_edit_status
     global login_edit_status
     global msg_to_all_status
+    global user_category
 
+    user_category = False
     faq_add_status = False
     faq_edit_status = False
     login_edit_status = False
@@ -268,6 +280,9 @@ async def stats_exit_ans(callback: types.CallbackQuery):
     if admin and ct(callback.message):
         selected_keyboard = keyboards[0]
         await callback.message.edit_text("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=current_keyboard(keyboards[0]))
+    
+    if not admin and ct(callback.message):
+        await callback.message.edit_text('Выберите опцию', reply_markup=u_start_keyboard())
 
 
 @dp.callback_query_handler(text="Вопрос__")
@@ -293,7 +308,21 @@ async def faq_edit_ans(callback: types.CallbackQuery):
     global faq_edit_status
     global current_data
     global selected_keyboard
+    global user_category
 
+    if not admin and not user_category:
+        user_category = callback.data
+        await callback.message.edit_text(f"Выберите вопрос по категории:", reply_markup=u_q_keyboard(callback.data))
+    elif not admin:
+        if callback.data == 'set_mark':
+            await callback.message.edit_text('Оцените, помог ли вам этот раздел', reply_markup=mark_btns())
+        elif callback.data == '✅' or callback.data == '❌':
+            category1 = str(encoding(user_category))
+            mark1 = bool(encoding_mark(callback.data))
+            stats_record(category1, mark1)
+            await callback.message.edit_text(f'Ваша оценка успешно выставлена. Спасибо, что помогаете нам!', reply_markup=u_start_keyboard())
+        else:
+            await callback.message.answer(u_a_keyboard(user_category, callback.data))
     if not faq_edit_status:
         return False
     elif admin:

@@ -1,4 +1,3 @@
-import keyword
 import pandas as pd
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -66,6 +65,7 @@ def faq_data_kb():
     keyboard = InlineKeyboardMarkup()
     for element in data:
         keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element)))
+    keyboard.add(InlineKeyboardButton(text="Назад", callback_data="stats_exit"))
     return keyboard
 
 def choice():
