@@ -1,7 +1,7 @@
 import pandas as pd
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from user_conf import encoding
+from users import encoding
 
 def is_admin(login, pwd):
     df = pd.read_csv('admin/login.csv', sep=',', header=None)

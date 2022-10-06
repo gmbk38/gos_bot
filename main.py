@@ -1,7 +1,7 @@
 import logging
-from admin import faq_data_kb, is_admin, current_keyboard, admin_skills, faq_add, faq_show, upd_q, upd_a, get_stats, get_users
-from user_conf import mark_btns, u_start_keyboard, u_q_keyboard, u_a_keyboard, stats_record
-from extra_func import chat_type as ct
+from admin import *
+from users import *
+from extra import chat_type as ct, was_admin
 from logs import User_log as ul
 
 from aiogram import Bot, Dispatcher, executor, types
@@ -28,6 +28,7 @@ a_edit = False
 
 user_check_faq = False
 user_category = False
+user_get_answer = False
 
 current_data = []
 user = ul() #объявляем пользователя
@@ -40,6 +41,15 @@ keyboards = {
     401: "faq_e"
 }
 selected_keyboard = None
+
+
+def was_used():
+    global user_get_answer
+    global user_check_faq
+    if not user_check_faq and not user_get_answer:
+        return True
+    else:
+        return False
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -179,7 +189,10 @@ async def common_answer(message: types.Message):
     if msg_to_all_status and ct(message) and admin:
         all_users = get_users()
         for i in all_users:
-            await bot.send_message(i,message.text)
+            try:
+                await bot.send_message(i,message.text)
+            except Exception as ex:
+                pass
         await message.answer("Рассылка выполнена успешно", reply_markup=current_keyboard(keyboards[0]))
 
 
@@ -194,6 +207,9 @@ async def common_answer(message: types.Message):
             q_add = message.text
 
 
+    if ct(message) and not admin and was_used():
+        await message.answer("В данный момент словарь недоступен")
+
 # Изменение логина и пароля
 @dp.callback_query_handler(text="login_edit")
 async def login_edit_ans(callback: types.CallbackQuery):
@@ -205,6 +221,8 @@ async def login_edit_ans(callback: types.CallbackQuery):
         login_edit_status = True
         selected_keyboard = None
         await callback.message.edit_text("Редактирование данных:\nПожалуйста, отправьте новый логин и пароль ОДНИМ сообщением", reply_markup=current_keyboard(keyboards[2]))
+    else:
+        await was_admin(callback)
 
 
 @dp.callback_query_handler(text="admin_exit")
@@ -224,6 +242,8 @@ async def faq_ans(callback: types.CallbackQuery):
     if admin and ct(callback.message):
         selected_keyboard = keyboards[1]
         await callback.message.edit_text("Выберите опцию:", reply_markup=current_keyboard(keyboards[1]))
+    else:
+        await was_admin(callback)
 
 
 @dp.callback_query_handler(text="faq_1")
@@ -258,6 +278,8 @@ async def faq_exit_ans(callback: types.CallbackQuery):
     if admin and ct(callback.message):
         selected_keyboard = keyboards[0]
         await callback.message.edit_text("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=current_keyboard(keyboards[0]))
+    else:
+        await was_admin(callback)
 
 
 @dp.callback_query_handler(text="msg_to_all")
@@ -270,6 +292,8 @@ async def msg_to_all_ans(callback: types.CallbackQuery):
         msg_to_all_status = True
         selected_keyboard = keyboards[3]
         await callback.message.edit_text("Отправьте сообщение для рассылки в чаты", reply_markup=current_keyboard(keyboards[3]))
+    else:
+        await was_admin(callback)
 
 
 @dp.callback_query_handler(text="stats")
@@ -280,6 +304,8 @@ async def stats_ans(callback: types.CallbackQuery):
     if admin and ct(callback.message):
         selected_keyboard = keyboards[2]
         await callback.message.edit_text(get_stats(), reply_markup=current_keyboard(keyboards[2]))
+    else:
+        await was_admin(callback)
 
 
 @dp.callback_query_handler(text="stats_exit")
@@ -315,9 +341,9 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
 
     answer_data = query.data
 
-    if answer_data == "Вопрос__":
+    if answer_data == "Вопрос__" and admin:
         q_edit = True
-    else:
+    elif admin:
         a_edit = True
 
     await query.message.edit_text(f"Введите новые данные", reply_markup=current_keyboard(keyboards[2]))
@@ -328,6 +354,7 @@ async def faq_edit_ans(callback: types.CallbackQuery):
     global faq_edit_status
     global current_data
     global selected_keyboard
+    global user_get_answer
     global user_category
 
     global user_check_faq
@@ -336,27 +363,32 @@ async def faq_edit_ans(callback: types.CallbackQuery):
         user_check_faq = True
         await callback.message.edit_text('Выберите интересующий вас вопрос', reply_markup=faq_data_kb())
 
+
     elif not admin and ct(callback.message) and user_check_faq:
         user_check_faq = False
         await callback.message.edit_text(f'{faq_show()[callback.data]}', reply_markup=current_keyboard(keyboards[2]))
 
 
-
     elif not admin and not user_category and ct(callback.message):
         user_category = callback.data
+        user_get_answer = True
         await callback.message.edit_text(f"Выберите вопрос по категории:", reply_markup=u_q_keyboard(callback.data))
+
 
     elif not admin and ct(callback.message):
 
         if callback.data == 'set_mark':
             await callback.message.edit_text('Оцените, помог ли вам этот раздел', reply_markup=mark_btns())
 
+
         elif callback.data == '✅' or callback.data == '❌' and ct(callback.message):
             stats_record(user_category, callback.data)
             user_category = False
             await callback.message.edit_text(f'Ваша оценка успешно выставлена. Спасибо, что помогаете нам!', reply_markup=u_start_keyboard())
 
-        elif ct(callback.message):
+
+        elif ct(callback.message) and user_get_answer:
+            user_get_answer = False
             await callback.message.answer(u_a_keyboard(user_category, callback.data))
 
     if not faq_edit_status:

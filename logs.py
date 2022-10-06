@@ -55,19 +55,17 @@ class User_log():
             file_upd.close()
 
 
-    def chat_record(self,msg):
-        #записываем сообщения пользователя
-        file_upd = open("chats/" + str(self.id) + ".txt","a+",encoding='utf-8')
-        date = str(datetime.now()).split(".")[0]
-        file_upd.write(date + " " + msg + "\n")
-        file_upd.close()
+    # def chat_record(self,msg):
+    #     #записываем сообщения пользователя
+    #     file_upd = open("chats/" + str(self.id) + ".txt","a+",encoding='utf-8')
+    #     date = str(datetime.now()).split(".")[0]
+    #     file_upd.write(date + " " + msg + "\n")
+    #     file_upd.close()
 
 
     def err_record(self,ex):
         #записываем ошибки
-        file_upd = open("err/err.txt","a+",encoding='utf-8')
+        file_upd = open("err/err.csv","a+",encoding='utf-8')
         date = str(datetime.now()).split(".")[0]
-        file_upd.write(date + " " + str(self.id) + "\n")
-        file_upd.write(str(ex) + "\n")
-        file_upd.write("\n")
+        file_upd.write(date + "," + str(self.id) + "," + str(ex) + "\n")
         file_upd.close()
