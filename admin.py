@@ -52,7 +52,17 @@ def msg_keyboard():
     return keyboard
 
 def faq_show():
-    df = pd.read_csv('faq/faq.csv', sep=',', header=None)
+    df = pd.read_csv('faq/faq.csv', sep=';', header=None, encoding='cp1251')
+    # print(df.values)
+    faq_dict = {}
+
+    for row in range(0, len(df)):
+        faq_dict[df[0].values[row][:20]] = df[1].values[row]
+
+    return faq_dict
+
+def faq_show_local():
+    df = pd.read_csv('faq/faq.csv', sep=';', header=None, encoding='cp1251')
     # print(df.values)
     faq_dict = {}
 
@@ -62,10 +72,10 @@ def faq_show():
     return faq_dict
     
 def faq_data_kb():
-    data = faq_show()
+    data = faq_show_local()
     keyboard = InlineKeyboardMarkup()
     for element in data:
-        keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element)))
+        keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element)[:20]))
     keyboard.add(InlineKeyboardButton(text="Назад", callback_data="stats_exit"))
     return keyboard
 
@@ -102,14 +112,14 @@ def read_all_id():
     pass
 
 def faq_add(q,a):
-        file_upd = open("faq/faq.csv","a+",encoding='utf-8')
-        file_upd.write(str(q) + "," + str(a) + "\n")
+        file_upd = open("faq/faq.csv","a+",encoding='cp1251')
+        file_upd.write(str(q) + ";" + str(a) + "\n")
         file_upd.close()
 
 def file_rewrite(data):
-        file_upd = open("faq/faq.csv","w",encoding='utf-8')
+        file_upd = open("faq/faq.csv","w",encoding='cp1251')
         for element in data:
-            file_upd.write(str(element) + "," + str(data[element]) + "\n")
+            file_upd.write(str(element) + ";" + str(data[element]) + "\n")
         file_upd.close()
 
 def upd_q(text, current_data):

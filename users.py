@@ -1,6 +1,14 @@
+import os
 import pandas as pd
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+def docs():
+    all_docs = []
+    for filename in os.listdir("files"):
+        all_docs.append('files/' + filename)
+
+    return all_docs
 
 def read_s():
     data = []
@@ -32,7 +40,7 @@ def u_start_keyboard():
     keyboard = InlineKeyboardMarkup()
     for element in headers:
         keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element[:20])))
-    keyboard.add(InlineKeyboardButton(text='FAQ', callback_data='show_faq'))
+    keyboard.add(InlineKeyboardButton(text='Частозадаваемые вопросы', callback_data='show_faq'))
     return keyboard
 
 def u_q_keyboard(header):
@@ -45,6 +53,7 @@ def u_q_keyboard(header):
     keyboard = InlineKeyboardMarkup()
     for element in q:
         keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element[:20])))
+    keyboard.add(InlineKeyboardButton(text="Получить примеры документов", callback_data="get_docs"))
     keyboard.row(InlineKeyboardButton(text="Назад", callback_data="stats_exit"), InlineKeyboardButton(text="Оценить", callback_data="set_mark"))
     return keyboard
 
@@ -63,7 +72,7 @@ def u_a_keyboard(category, q):
 
 def mark_btns():
     keyboard = InlineKeyboardMarkup()
-    keyboard.row(InlineKeyboardButton(text='✅', callback_data='✅'), InlineKeyboardButton(text='❌', callback_data='❌'))
+    keyboard.row(InlineKeyboardButton(text='👍', callback_data='✅'), InlineKeyboardButton(text='👎', callback_data='❌'))
     keyboard.add(InlineKeyboardButton(text="Назад", callback_data="stats_exit"))
     return keyboard
 

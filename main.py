@@ -241,7 +241,7 @@ async def faq_ans(callback: types.CallbackQuery):
     
     if admin and ct(callback.message):
         selected_keyboard = keyboards[1]
-        await callback.message.edit_text("Выберите опцию:", reply_markup=current_keyboard(keyboards[1]))
+        await callback.message.edit_text("Выберите услугу:", reply_markup=current_keyboard(keyboards[1]))
     else:
         await was_admin(callback)
 
@@ -317,19 +317,23 @@ async def stats_exit_ans(callback: types.CallbackQuery):
     global login_edit_status
     global msg_to_all_status
     global user_category
+    global user_check_faq
+    global user_get_answer
 
     user_category = False
     faq_add_status = False
     faq_edit_status = False
     login_edit_status = False
     msg_to_all_status = False
+    user_check_faq = False
+    user_get_answer = False
     
     if admin and ct(callback.message):
         selected_keyboard = keyboards[0]
         await callback.message.edit_text("Панель администратора:\n\nЗдесь представлен набор функций для управления ботом. Приятной работы!", reply_markup=current_keyboard(keyboards[0]))
     
     if not admin and ct(callback.message):
-        await callback.message.edit_text('Выберите опцию', reply_markup=u_start_keyboard())
+        await callback.message.edit_text('Выберите услугу', reply_markup=u_start_keyboard())
 
 
 @dp.callback_query_handler(text="Вопрос__")
@@ -347,6 +351,13 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
         a_edit = True
 
     await query.message.edit_text(f"Введите новые данные", reply_markup=current_keyboard(keyboards[2]))
+
+@dp.callback_query_handler(text="get_docs")
+async def send_docs(callback: types.CallbackQuery):
+    all_docs = docs()
+    for element in all_docs:
+        # print (element)
+        await bot.send_document(callback.message.chat.id, open(element, 'rb'))
 
 
 @dp.callback_query_handler()
@@ -374,7 +385,6 @@ async def faq_edit_ans(callback: types.CallbackQuery):
         user_get_answer = True
         await callback.message.edit_text(f"Выберите вопрос по категории:", reply_markup=u_q_keyboard(callback.data))
 
-
     elif not admin and ct(callback.message):
 
         if callback.data == 'set_mark':
@@ -388,7 +398,7 @@ async def faq_edit_ans(callback: types.CallbackQuery):
 
 
         elif ct(callback.message) and user_get_answer:
-            user_get_answer = False
+            # user_get_answer = False
             await callback.message.answer(u_a_keyboard(user_category, callback.data))
 
     if not faq_edit_status:
