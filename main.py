@@ -399,8 +399,9 @@ async def faq_edit_ans(callback: types.CallbackQuery):
         # user_get_term= False
         meaning, file = terms_answer(callback.data)
         if file != '-':
-            await callback.message.edit_text(meaning , reply_markup=terms_keyboard())
+            await callback.message.edit_text(meaning)
             await bot.send_document(callback.message.chat.id, open('files/' + file, 'rb'))
+            await bot.send_message(callback.message.chat.id, 'Выберите интересующее вас слово', reply_markup=terms_keyboard())
         else:
             await callback.message.edit_text(meaning, reply_markup=terms_keyboard())
 
