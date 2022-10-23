@@ -41,6 +41,7 @@ def u_start_keyboard():
     for element in headers:
         keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element[:20])))
     keyboard.add(InlineKeyboardButton(text='Частозадаваемые вопросы', callback_data='show_faq'))
+    keyboard.add(InlineKeyboardButton(text="Термины", callback_data="get_terms"))
     return keyboard
 
 def u_q_keyboard(header):
@@ -131,3 +132,25 @@ def stats_record(category, mark):
         for element in main_stats:
             file_upd.write(element[0] + "," + str(element[1]) + "," + str(element[2]) + "\n")
         file_upd.close()
+
+def terms_load():
+    data = []
+    df = pd.read_excel('terms/terms.xlsx', sheet_name='Термины', header=None)
+    for i in range(0, df.shape[0]):
+        data.append({'word' : df[0][i], 'meaning' : df[1][i], 'file' : df[2][i]})
+    return data
+
+def terms_keyboard():
+    data =terms_load()
+    keyboard = InlineKeyboardMarkup()
+    for element in data:
+        # print(element['word'])
+        keyboard.add(InlineKeyboardButton(text=str(element['word']), callback_data=str(element['word'][:20])))
+    keyboard.add(InlineKeyboardButton(text="Назад", callback_data="stats_exit"))
+    return keyboard
+
+def terms_answer(word):
+    data = terms_load()
+    for element in data:
+        if element['word'][:20] == word:
+            return element['meaning'], element['file']
