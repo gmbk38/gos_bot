@@ -40,7 +40,7 @@ def u_start_keyboard():
     keyboard = InlineKeyboardMarkup()
     for element in headers:
         keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(element[:20])))
-    keyboard.add(InlineKeyboardButton(text='Частозадаваемые вопросы', callback_data='show_faq'))
+    keyboard.add(InlineKeyboardButton(text='Часто задаваемые вопросы', callback_data='show_faq'))
     keyboard.add(InlineKeyboardButton(text="Термины", callback_data="get_terms"))
     return keyboard
 
