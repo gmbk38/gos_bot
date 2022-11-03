@@ -39,7 +39,7 @@ keyboards = {
     2: "stats",
     3: "msg",
     400: "faq_data", 
-    401: "faq_e"
+    401: "faq_e",
 }
 selected_keyboard = None
 
@@ -72,7 +72,7 @@ async def start_ans(message: types.Message):
 
 # @dp.message_handler(commands=['chat'])
 # async def send_welcome(message: types.Message):
-#     await message.answer(f"Всё")
+#     await message.answer(f"Всё украл")
 #     element = await bot.get_chat(message.chat.id) #Вся инфа о чате
 #     element2 = await bot.get_chat_members_count(message.chat.id)
 #     # bot.ban_chat_member(chat_id, user_id, datetime.now() + timedelta(days=1))
@@ -329,6 +329,7 @@ async def stats_exit_ans(callback: types.CallbackQuery):
     msg_to_all_status = False
     user_check_faq = False
     user_get_answer = False
+    user_get_term = False
     
     if admin and ct(callback.message):
         selected_keyboard = keyboards[0]
@@ -360,6 +361,8 @@ async def send_docs(callback: types.CallbackQuery):
     for element in all_docs:
         # print (element)
         await bot.send_document(callback.message.chat.id, open(element, 'rb'))
+
+
 @dp.callback_query_handler(text="get_terms")
 async def send_terms(callback: types.CallbackQuery):
     global user_get_term
@@ -370,7 +373,6 @@ async def send_terms(callback: types.CallbackQuery):
     # for element in all_docs:
         # print (element)
         # await bot.send_document(callback.message.chat.id, open(element, 'rb'))
-
 
 
 @dp.callback_query_handler()
@@ -397,11 +399,11 @@ async def faq_edit_ans(callback: types.CallbackQuery):
         # user_get_term= False
         meaning, file = terms_answer(callback.data)
         if file != '-':
-            await callback.message.edit_text(meaning)
+            await callback.message.edit_text(meaning , reply_markup=terms_keyboard())
             await bot.send_document(callback.message.chat.id, open('files/' + file, 'rb'))
-            await bot.send_message(callback.message.chat.id, 'Выберите интересующее вас слово', reply_markup=terms_keyboard())
         else:
             await callback.message.edit_text(meaning, reply_markup=terms_keyboard())
+
 
     elif not admin and not user_category and ct(callback.message):
         user_category = callback.data
