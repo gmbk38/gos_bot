@@ -209,7 +209,10 @@ async def common_answer(message: types.Message):
 
 
     if ct(message) and not admin and was_used():
-        await message.answer("В данный момент словарь недоступен")
+        # await message.answer("В данный момент словарь недоступен")
+        ans = search(message.text)
+        # print(ans)
+        await message.answer(ans)
 
 # Изменение логина и пароля
 @dp.callback_query_handler(text="login_edit")

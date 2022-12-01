@@ -154,3 +154,11 @@ def terms_answer(word):
     for element in data:
         if element['word'][:20] == word:
             return element['meaning'], element['file']
+
+def search(word):
+    data = read_s()
+    # print(data)
+    for el in data:
+        if word in el['a']:
+            return el['header'] + ' -> ' + el['q']
+        # print('\n\n')
